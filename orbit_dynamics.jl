@@ -1,6 +1,6 @@
-"""
-Functions and structs for simulating orbits
-"""
+# Functions and structs for simulating orbits
+
+using DifferentialEquations
 
 struct DynamicsParameters
     # fixed parameters
@@ -78,10 +78,9 @@ function solve_orbit_dynamics_ECI_state(x0, p::DynamicsParameters, t_end)
     prob = ODEProblem(orbit_dynamics_ECI_state!, x0, t_span, p)
     sol = solve(prob, saveat=t_end/1e5, abstol=1e-8, reltol=1e-8);
     
-    r_sol = sol[1:3,:]
-    v_sol = sol[4:6,:]
+    x_sol = sol[1:6,:]
     t_sol = sol.t
-    return r_sol, v_sol, t_sol
+    return x_sol, t_sol
 end
 
 function circular_orbit_initial_conditions(orbit_altitude, inclination, p::DynamicsParameters)
@@ -137,6 +136,18 @@ function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
 	x_dot[5] = k_dot
 	x_dot[6] = L_dot
 
+end
+
+function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end)
+    
+    t_span = (0.0, t_end)    
+    
+    prob = ODEProblem(orbit_dynamics_equinoctial!, x0, t_span, dp)
+    sol = solve(prob, saveat=t_end/1e5, abstol=1e-8, reltol=1e-8);
+    
+    x_sol = sol[1:6,:]
+    t_sol = sol.t
+    return x_sol, t_sol
 end
 
 function gravity_perturbation_equinoctial(x, dp)
@@ -210,6 +221,18 @@ function orbit_dynamics_classical_elements!(x_dot, x, dp::DynamicsParameters, t)
 
 end
 
+function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_end)
+    
+    t_span = (0.0, t_end)    
+    
+    prob = ODEProblem(orbit_dynamics_classical_elements!, x0, t_span, dp)
+    sol = solve(prob, saveat=t_end/1e5, abstol=1e-8, reltol=1e-8);
+    
+    x_sol = sol[1:6,:]
+    t_sol = sol.t
+    return x_sol, t_sol
+end
+
 function gravity_perturbation_classical(x, dp)
 	a, e, i, omega, Omega, theta = x
 	p = a*(1-e^2)
@@ -239,5 +262,5 @@ function drag_perturbation_classical(x, dp)
 	v_R = (n * a * e * sin(theta))/sqrt(1 - e^2)
 	v_T = (n * a * (1 + e*cos(theta)))/sqrt(1 - e^2)
 
-	return drag_perturbation_RTN(v_R, v_T)
+	return drag_perturbation_RTN(v_R, v_T, dp)
 end
