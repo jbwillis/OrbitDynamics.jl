@@ -26,7 +26,7 @@ struct DynamicsParameters
         return new(
             G_gravity,
             M_earth,
-			mu = G_gravity * M_earth,
+			G_gravity * M_earth,
             J2,
             R_earth,
             m_satellite,
