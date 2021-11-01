@@ -76,7 +76,7 @@ function solve_orbit_dynamics_ECI_state(x0, p::DynamicsParameters, t_end)
     t_span = (0.0, t_end)    
     
     prob = ODEProblem(orbit_dynamics_ECI_state!, x0, t_span, p)
-    sol = solve(prob, saveat=t_end/1e5, abstol=1e-8, reltol=1e-8);
+    sol = solve(prob, saveat=t_end/1e4, abstol=1e-8, reltol=1e-8);
     
     x_sol = sol[1:6,:]
     t_sol = sol.t
@@ -143,7 +143,7 @@ function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end)
     t_span = (0.0, t_end)    
     
     prob = ODEProblem(orbit_dynamics_equinoctial!, x0, t_span, dp)
-    sol = solve(prob, saveat=t_end/1e5, abstol=1e-8, reltol=1e-8);
+    sol = solve(prob, saveat=t_end/1e4, abstol=1e-8, reltol=1e-8);
     
     x_sol = sol[1:6,:]
     t_sol = sol.t
@@ -226,7 +226,7 @@ function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_e
     t_span = (0.0, t_end)    
     
     prob = ODEProblem(orbit_dynamics_classical_elements!, x0, t_span, dp)
-    sol = solve(prob, saveat=t_end/1e5, abstol=1e-8, reltol=1e-8);
+    sol = solve(prob, saveat=t_end/1e4, abstol=1e-8, reltol=1e-8);
     
     x_sol = sol[1:6,:]
     t_sol = sol.t
