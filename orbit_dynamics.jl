@@ -264,3 +264,50 @@ function drag_perturbation_classical(x, dp)
 
 	return drag_perturbation_RTN(v_R, v_T, dp)
 end
+
+"""
+Use Runge-Kutta 4 to integrate the dynamics from `t_start` to `t_end` 
+using `x0` as the initial condition, 
+`p` as parameters for the dynamics function,
+and `h` as the fixed timestep.
+"""
+function integrate_RK4(dynamics!, x0, p, t_start, t_end, h)
+
+	N = Int(round((t_end - t_start) / h) + 1)
+
+	# allocate arrays
+	x = Array{Float64}(undef, length(x0), N)
+	t = zeros(N)
+
+	# initial condition
+	x[:,1] .= x0
+	t[1] = 0.0
+
+	# integrate
+	for i=2:N
+		t[i] = h*(i-1)
+		step_RK4!(dynamics!, view(x, :, i), x[:,i-1], p, t[i], h)
+	end
+
+	return x, t
+end
+
+"""
+Use Runge-Kutta 4 to integrate the dynamics at `(x, t)`, using parameters `p` and timestep `h`.
+"""
+function step_RK4!(dynamics!, x_kp1, x_k, p, t, h)
+
+	k1 = similar(x_k)
+	k2 = similar(x_k)
+	k3 = similar(x_k)
+	k4 = similar(x_k)
+
+	dynamics!(k1, x_k, p, t)
+	dynamics!(k2, x_k .+ 0.5 .* h .* k1, p, t + 0.5 * h)
+	dynamics!(k3, x_k .+ 0.5 .* h .* k2, p, t + 0.5 * h)
+	dynamics!(k4, x_k .+ h .* k3, p, t + h)
+
+	x_kp1 .= x_k .+ (1.0/6.0) * h .* (k1 .+ (2 .* k2) .+ (2 .* k3) .+ k4)
+
+end
+
