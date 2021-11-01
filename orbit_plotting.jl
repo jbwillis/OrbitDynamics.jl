@@ -8,6 +8,7 @@ function plot_3D_position(r; label=nothing, fig=nothing, ax=nothing)
 	if fig == nothing || ax == nothing
 		fig = plt.figure()
 		ax = Axes3D(fig, auto_add_to_figure=false)
+		ax.scatter3D(0.0, 0.0, 0.0, color="green")
 	end
     ax.plot3D(r[1,:], r[2,:], r[3,:], label=label)
     ax.set_title("3D Position")
