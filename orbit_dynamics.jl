@@ -36,10 +36,10 @@ struct DynamicsParameters
     end
 end
 
+"""
+Taken from Spacecraft Attitude Determination and Control - works well
+"""
 function gravity_force_from_r(r, p::DynamicsParameters)
-    """
-    Taken from Spacecraft Attitude Determination and Control - works well
-    """
     r_mag = sqrt(r'*r)
     a_g = -(p.mu/r_mag^3) * r
     a_J2 = -(3.0/2.0) * p.J2 * (p.mu/r_mag^2) * (p.R_earth/r_mag)^2 * [ 
@@ -97,15 +97,15 @@ function circular_orbit_initial_conditions(orbit_altitude, inclination, p::Dynam
     return x
 end
 
+"""
+Use the modified equinoctial elements to simulate.
+Allows large time steps and prevents singularities for e=0, i=0,90 degrees
+
+See: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
+
+x = [p, f, g, h, k, L]
+"""
 function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
-	"""
-	Use the modified equinoctial elements to simulate.
-	Allows large time steps and prevents singularities for e=0, i=0,90 degrees
-
-	See: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
-
-	x = [p, f, g, h, k, L]
-	"""
 
 	p, f, g, h, k, L = x
 
@@ -150,10 +150,10 @@ function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end)
     return x_sol, t_sol
 end
 
+"""
+J2 perturbing gravity forces computed using equinoctial coordinates
+"""
 function gravity_perturbation_equinoctial(x, dp)
-	"""
-	J2 perturbing gravity forces computed using equinoctial coordinates
-	"""
 
 	p, f, g, h, k, L = x
 
@@ -168,10 +168,10 @@ function gravity_perturbation_equinoctial(x, dp)
 	return u_J2
 end
 
+"""
+Aerodynamic drag accelerations using equinoctial coordinates
+"""
 function drag_perturbation_equinoctial(x, dp::DynamicsParameters)
-	"""
-	Aerodynamic drag accelerations using equinoctial coordinates
-	"""
 
 	p, f, g, h, k, L = x
 
@@ -250,10 +250,10 @@ function gravity_perturbation_classical(x, dp)
 	return u_J2
 end
 
+"""
+Source: Position and velocity perturbations in the orbital frame in terms of classical element perturbations
+"""
 function drag_perturbation_classical(x, dp)
-	"""
-	Source: Position and velocity perturbations in the orbital frame in terms of classical element perturbations 
-	"""
 
 	a, e, i, omega, Omega, theta = x
 

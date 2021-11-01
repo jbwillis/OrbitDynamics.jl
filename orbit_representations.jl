@@ -4,10 +4,10 @@ using LinearAlgebra
 
 include("orbit_dynamics.jl")
 
+"""
+Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
+"""
 function equinoctial_to_classical_elements(x_eq)
-	"""
-	Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
-	"""
 	p, f, g, h, k, L = x_eq
 
 	a = p / (1 - f^2 - g^2)
@@ -24,10 +24,10 @@ function equinoctial_to_classical_elements(x_eq)
 	return [a, e, i, omega, Omega, theta]
 end
 
+"""
+Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
+"""
 function classical_to_equinoctial_elements(x_cl)
-	"""
-	Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
-	"""
 	a, e, i, omega, Omega, theta = x_cl
 	
 	p = a * (1 - e^2)
@@ -41,10 +41,10 @@ function classical_to_equinoctial_elements(x_cl)
 	return [p, f, g, h, k, L]
 end
 
+"""
+Reference: Fundamentals of Spacecraft Attitude Determination and Control, pg 380
+"""
 function classical_to_state_vector(x_cl, dp::DynamicsParameters)
-	"""
-	Reference: Fundamentals of Spacecraft Attitude Determination and Control, pg 380
-	"""
 	a, e, i, omega, Omega, theta = x_cl
 
 	A11 = cos(Omega) * cos(omega) - sin(Omega) * sin(omega) * cos(i)
@@ -73,10 +73,10 @@ function classical_to_state_vector(x_cl, dp::DynamicsParameters)
 	return vcat(r_vec, v_vec)
 end
 
+"""
+Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
+"""
 function equinoctial_to_state_vector(x_eq, dp::DynamicsParameters)
-	"""
-	Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
-	"""
 	p, f, g, h, k, L = x_eq
 
 	alpha_sq = h^2 - k^2
@@ -95,10 +95,10 @@ function equinoctial_to_state_vector(x_eq, dp::DynamicsParameters)
 	return [r_x, r_y, r_z, v_x, v_y, v_z]
 end
 
+"""
+Reference: Fundamentals of Spacecraft Attitude Determination and Control, pg 380
+"""
 function state_vector_to_equinoctial_elements(x_st, dp::DynamicsParameters)
-	"""
-	Reference: Fundamentals of Spacecraft Attitude Determination and Control, pg 380
-	"""
 
 	# need better method for this
 	x_cl = state_vector_to_classical_elements(x_st, dp)
@@ -107,10 +107,10 @@ function state_vector_to_equinoctial_elements(x_st, dp::DynamicsParameters)
 	return x_eq
 end
 
+"""
+Source: Followed https://github.com/sisl/SatelliteDynamics.jl/blob/master/src/astrodynamics.jl#L248
+"""
 function state_vector_to_classical_elements(x_st, dp::DynamicsParameters)
-	"""
-	Source: Followed https://github.com/sisl/SatelliteDynamics.jl/blob/master/src/astrodynamics.jl#L248
-	"""
 
 	r = x_st[1:3]
 	v = x_st[4:6]
