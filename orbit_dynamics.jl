@@ -107,16 +107,16 @@ function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
 
 	u_R, u_T, u_N = (u_J2 + u_drag)
 
-	w = 1 + f * cos(L) + g * sin(L)
+	w = 1 + (f * cos(L)) + (g * sin(L))
 	s_sq = 1 + h^2 + k^2
 
-	p_dot = 2 * (p / w) * sqrt(p / dp.mu) * u_R
+	p_dot = 2 * (p / w) * sqrt(p / dp.mu) * u_T
 	f_dot = ((sqrt(p / dp.mu) * sin(L) * u_R)
 			 + (sqrt(p / dp.mu) * (1 / w) * ((w + 1) * cos(L) + f) * u_T)
 			 - (sqrt(p / dp.mu) * (g / w) * (h * sin(L) - k * cos(L)) * u_N))
 	g_dot = ((-sqrt(p / dp.mu) * cos(L) * u_R)
 			 + (sqrt(p / dp.mu) * ((w + 1) * sin(L) + g) * u_T)
-			 - (sqrt(p / dp.mu) * (f / w) * (h * sin(L) - k * cos(L)) * u_N))
+			 + (sqrt(p / dp.mu) * (f / w) * (h * sin(L) - k * cos(L)) * u_N))
 	h_dot = sqrt(p/dp.mu) * (s_sq / (2 * w)) * cos(L) * u_N
 	k_dot = sqrt(p/dp.mu) * (s_sq / (2 * w)) * sin(L) * u_N
 	L_dot = ((sqrt(dp.mu * p) * (w / p)^2)
