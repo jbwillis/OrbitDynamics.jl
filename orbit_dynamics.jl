@@ -208,7 +208,7 @@ function orbit_dynamics_classical_elements!(x_dot, x, dp::DynamicsParameters, t)
 	a_dot = 2 * (a^2 / h) * ((e*sin(theta)*u_R) + ((p/r) * u_T))
 	e_dot = (1/h) * (p*sin(theta)*u_R + (((p+r)*cos(theta) + r*e)*u_T))
 	i_dot = r * cos(theta + omega) * u_N / h
-	omega_dot = (1/e*h) * ((-p * cos(theta) * u_R) + ((p + r) * sin(theta) * u_T)) - ((r * sin(theta + omega) * cos(i)) * u_N / (h * sin(i)))
+	omega_dot = (1/(e*h)) * ((-p * cos(theta) * u_R) + ((p + r) * sin(theta) * u_T)) - ((r * sin(theta + omega) * cos(i)) * u_N / (h * sin(i)))
 	Omega_dot = (r * sin(theta + omega) * u_N) / (h * sin(i))
 	theta_dot = (h/r^2) + (1/(e*h)) * ((p * cos(theta) * u_R) - ((p + r) * sin(theta) * u_T))
 
