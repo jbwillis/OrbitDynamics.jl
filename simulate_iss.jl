@@ -4,13 +4,13 @@ include("orbit_dynamics.jl")
 include("orbit_representations.jl")
 include("orbit_plotting.jl")
 
-dp = DynamicsParameters(m_satellite=1.0, A=10)
+dp = DynamicsParameters(m_satellite=1.0, A=0.1)
 sma_iss = 420e3 + dp.R_earth
 e_iss = 0.0003836
 i_iss = deg2rad(51.64)
 ω_iss = deg2rad(90)
-Ω_iss = deg2rad(0)
-θ0_iss = deg2rad(0)
+Ω_iss = deg2rad(15)
+θ0_iss = deg2rad(15)
 
 x0_cl = [sma_iss, e_iss, i_iss, ω_iss, Ω_iss, θ0_iss]
 x0_st = classical_to_state_vector(x0_cl, dp)
