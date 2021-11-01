@@ -6,13 +6,13 @@ include("orbit_plotting.jl")
 
 dp = DynamicsParameters(m_satellite=1.0, A = .1, J2=0.0, rho=0.0)
 sma_iss = 420e3 + dp.R_earth
+e_iss = 0.0003836 
 i_iss = deg2rad(51.64)
-e_iss = 0.1
 ω_iss = deg2rad(90)
 Ω_iss = deg2rad(0)
 θ0_iss = deg2rad(0)
 
-x0_cl = [sma_iss, i_iss, e_iss, ω_iss, Ω_iss, θ0_iss]
+x0_cl = [sma_iss, e_iss, i_iss, ω_iss, Ω_iss, θ0_iss]
 x0_st = classical_to_state_vector(x0_cl, dp)
 x0_eq = classical_to_equinoctial_elements(x0_cl)
 
