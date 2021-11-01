@@ -4,9 +4,9 @@ include("orbit_dynamics.jl")
 include("orbit_representations.jl")
 include("orbit_plotting.jl")
 
-dp = DynamicsParameters(m_satellite=1.0, A = .1, J2=0.0, rho=0.0)
+dp = DynamicsParameters(m_satellite=1.0, A=10)
 sma_iss = 420e3 + dp.R_earth
-e_iss = 0.0003836 
+e_iss = 0.0003836
 i_iss = deg2rad(51.64)
 ω_iss = deg2rad(90)
 Ω_iss = deg2rad(0)
@@ -34,13 +34,6 @@ cl_st = reduce(hcat, [state_vector_to_classical_elements(x_st[:,i], dp) for i=1:
 cl_eq = reduce(hcat, [equinoctial_to_classical_elements(x_eq[:,i]) for i=1:size(x_eq)[2]])
 
 fig, ax = plot_classical_elements(cl_st, t_st; label="Cartesian")
-plot_classical_elements(x_cl, t_eq; fig=fig, ax=ax, label="Classical")
+plot_classical_elements(x_cl, t_cl; fig=fig, ax=ax, label="Classical")
 plot_classical_elements(cl_eq, t_eq; fig=fig, ax=ax, label="Equinoctial")
-
-
-
-
-
-
-
 
