@@ -1,7 +1,5 @@
 # Functions and structs for simulating orbits
 
-using DifferentialEquations
-
 struct DynamicsParameters
     # fixed parameters
     G_gravity::Float64
@@ -71,16 +69,11 @@ function orbit_dynamics_ECI_state!(x_dot, x, p::DynamicsParameters, t)
     
 end
 
-function solve_orbit_dynamics_ECI_state(x0, p::DynamicsParameters, t_end)
+function solve_orbit_dynamics_ECI_state(x0, dp::DynamicsParameters, t_end, h=0.1)
     
-    t_span = (0.0, t_end)    
-    
-    prob = ODEProblem(orbit_dynamics_ECI_state!, x0, t_span, p)
-    sol = solve(prob, saveat=t_end/1e4, abstol=1e-8, reltol=1e-8);
-    
-    x_sol = sol[1:6,:]
-    t_sol = sol.t
-    return x_sol, t_sol
+	x, t = integrate_RK4(orbit_dynamics_ECI_state!, x0, dp, 0.0, t_end, h)
+
+    return x, t
 end
 
 function circular_orbit_initial_conditions(orbit_altitude, inclination, p::DynamicsParameters)
@@ -138,16 +131,11 @@ function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
 
 end
 
-function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end)
+function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end, h=1.0)
     
-    t_span = (0.0, t_end)    
-    
-    prob = ODEProblem(orbit_dynamics_equinoctial!, x0, t_span, dp)
-    sol = solve(prob, saveat=t_end/1e4, abstol=1e-8, reltol=1e-8);
-    
-    x_sol = sol[1:6,:]
-    t_sol = sol.t
-    return x_sol, t_sol
+	x, t = integrate_RK4(orbit_dynamics_equinoctial!, x0, dp, 0.0, t_end, h)
+
+    return x, t
 end
 
 """
@@ -221,16 +209,11 @@ function orbit_dynamics_classical_elements!(x_dot, x, dp::DynamicsParameters, t)
 
 end
 
-function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_end)
+function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_end, h=1.0)
     
-    t_span = (0.0, t_end)    
-    
-    prob = ODEProblem(orbit_dynamics_classical_elements!, x0, t_span, dp)
-    sol = solve(prob, saveat=t_end/1e4, abstol=1e-8, reltol=1e-8);
-    
-    x_sol = sol[1:6,:]
-    t_sol = sol.t
-    return x_sol, t_sol
+	x, t = integrate_RK4(orbit_dynamics_classical_elements!, x0, dp, 0.0, t_end, h)
+
+    return x, t
 end
 
 function gravity_perturbation_classical(x, dp)
