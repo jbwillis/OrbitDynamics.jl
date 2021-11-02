@@ -54,6 +54,8 @@ end
 function plot_classical_elements(x_cl, t; label=nothing, fig=nothing, ax=nothing, t_scale::t_scale_e=hr)
 	if fig == nothing || ax == nothing
 		fig, ax = plt.subplots(6, 1, sharex=true)
+
+		fig.suptitle("Osculating Elements")
 	end
 
 	t_plot = t ./ Int(t_scale)
