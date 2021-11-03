@@ -1,4 +1,5 @@
 # Test/Example program of using this package to simulate the ISS
+using Pkg;Pkg.activate(".");Pkg.instantiate()
 
 include("orbit_dynamics.jl")
 include("orbit_representations.jl")
@@ -37,3 +38,26 @@ fig, ax = plot_classical_elements(cl_st, t_st; label="Cartesian")
 plot_classical_elements(x_cl, t_cl; fig=fig, ax=ax, label="Classical")
 plot_classical_elements(cl_eq, t_eq; fig=fig, ax=ax, label="Equinoctial")
 
+# plot specific mechanical energy
+sme_st = reduce(hcat, [specific_mechanical_energy(x_st[:,i], cl_st[:,i], dp) for i=1:size(x_st)[2]])
+sme_cl = reduce(hcat, [specific_mechanical_energy(rv_cl[:,i], x_cl[:,i], dp) for i=1:size(rv_cl)[2]])
+sme_eq = reduce(hcat, [specific_mechanical_energy(rv_eq[:,i], x_eq[:,i], dp) for i=1:size(rv_eq)[2]])
+
+fig, ax = plt.subplots(1)
+ax.plot(t_st ./ Int(hr), sme_st', label="Cartesian")
+ax.plot(t_cl ./ Int(hr), sme_cl', label="Classical")
+ax.plot(t_eq ./ Int(hr), sme_eq', "--", label="Equinoctial")
+ax.set_title("Specific Mechanical Energy")
+ax.legend()
+
+# plot gravity perturbation norm
+g_st = reduce(hcat, [norm(gravity_perturbation_ECI(rv_eq[:,i], dp)) for i=1:size(rv_eq)[2]])
+g_cl = reduce(hcat, [norm(gravity_perturbation_classical(cl_eq[:,i], dp)) for i=1:size(cl_eq)[2]])
+g_eq = reduce(hcat, [norm(gravity_perturbation_equinoctial(x_eq[:,i], dp)) for i=1:size(x_eq)[2]])
+
+fig, ax = plt.subplots(1)
+ax.plot(t_eq ./ Int(hr), g_st', label="Cartesian")
+ax.plot(t_eq ./ Int(hr), g_cl', label="Classical")
+ax.plot(t_eq ./ Int(hr), g_eq', "--", label="Equinoctial")
+ax.legend()
+ax.set_title("J2 Gravity Norm - same state, different methods")
