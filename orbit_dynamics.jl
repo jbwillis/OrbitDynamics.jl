@@ -19,12 +19,12 @@ struct DynamicsParameters
             A=(.3*.1), # side of a 3U
             G_gravity=6.674e-11,
             M_earth=5.9722e24, # kg
-            J2=0.1082626925638815e-2, 
-            R_earth=6378137.)
+			J2=0.0010826358191967,
+			R_earth=6.378136300e6)
         return new(
             G_gravity,
             M_earth,
-			G_gravity * M_earth,
+			3.986004415e14, # mu
             J2,
             R_earth,
             m_satellite,
