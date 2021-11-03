@@ -267,7 +267,7 @@ function integrate_RK4(dynamics!, x0, p, t_start, t_end, h)
 	N = Int(round((t_end - t_start) / h) + 1)
 
 	# allocate arrays
-	x = Array{Float64}(undef, length(x0), N)
+	x = zeros(length(x0), N)
 	t = zeros(N)
 
 	# initial condition
