@@ -167,3 +167,29 @@ end
 function M_from_E(E, e)
     return E - e * sin(E)
 end
+
+"""
+Compute the specific mechanical energy of a given set of orbit states
+"""
+function specific_mechanical_energy(x_rv, x_cl, dp::DynamicsParameters)
+
+	a, e, i, omega, Omega, theta = x_cl
+
+	r_mag = norm(x_rv[1:3])
+	v_mag = norm(x_rv[4:6])
+
+
+	c_phi = sin(i) * sin(theta + omega)
+	P2 = 0.5 * (3 * c_phi^2 - 1)
+	U_J2 = (-dp.mu / r_mag) * dp.J2 * (dp.R_earth / r_mag)^2 * P2
+
+	# u_J2 = gravity_perturbation_classical(x_cl, dp)
+	# U_J2 = norm(u_J2)
+	# u_J2 = gravity_perturbation_ECI(x_rv, dp)
+	# U_J2 = norm(u_J2)
+	
+	sme = 0.5 * (v_mag^2) - (dp.mu / r_mag) - U_J2
+
+	return sme
+
+end
