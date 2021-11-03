@@ -37,17 +37,25 @@ end
 """
 Taken from Spacecraft Attitude Determination and Control - works well
 """
-function gravity_force_from_r(r, p::DynamicsParameters)
+function gravity_force_ECI(x, p::DynamicsParameters)
+	r = x[1:3]
     r_mag = sqrt(r'*r)
     a_g = -(p.mu/r_mag^3) * r
+	a_J2 = gravity_perturbation_ECI(x, p)
+    F_g = p.m_satellite * (a_g + a_J2)
+
+    return F_g
+end
+
+function gravity_perturbation_ECI(x, p::DynamicsParameters)
+	r = x[1:3]
+    r_mag = sqrt(r'*r)
     a_J2 = -(3.0/2.0) * p.J2 * (p.mu/r_mag^2) * (p.R_earth/r_mag)^2 * [ 
         (1 - 5*(r[3]/r_mag)^2) * r[1]/r_mag,        
         (1 - 5*(r[3]/r_mag)^2) * r[2]/r_mag,        
         (3 - 5*(r[3]/r_mag)^2) * r[3]/r_mag]
-    
-    F_g = p.m_satellite * (a_g + a_J2)
 
-    return F_g
+	return a_J2
 end
     
 
@@ -59,7 +67,7 @@ function orbit_dynamics_ECI_state!(x_dot, x, p::DynamicsParameters, t)
     v_mag = sqrt(v'*v)            
         
     # Gravity        
-    F_g = gravity_force_from_r(r, p)    
+    F_g = gravity_force_ECI(x, p)    
     
     # Drag
     F_d = -0.5 * p.rho * p.C_D * p.A * v_mag .* v
