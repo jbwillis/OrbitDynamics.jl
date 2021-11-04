@@ -1,5 +1,5 @@
 # Test/Example program of using this package to simulate the ISS
-using Pkg;Pkg.activate(".");Pkg.instantiate()
+using Pkg;Pkg.activate(@__DIR__);
 
 include("orbit_dynamics.jl")
 include("orbit_representations.jl")
