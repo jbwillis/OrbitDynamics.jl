@@ -59,7 +59,7 @@ function gravity_perturbation_ECI(x, p::DynamicsParameters)
 end
     
 
-function orbit_dynamics_ECI_state!(x_dot, x, p::DynamicsParameters, t)
+function orbit_dynamics_ECI_state(x, p::DynamicsParameters, t)
     
     r = x[1:3]
     r_mag = sqrt(r'*r)
@@ -72,14 +72,14 @@ function orbit_dynamics_ECI_state!(x_dot, x, p::DynamicsParameters, t)
     # Drag
     F_d = -0.5 * p.rho * p.C_D * p.A * v_mag .* v
     
-    x_dot[1:3] = v
-    x_dot[4:6] = (1.0/p.m_satellite) .* (F_g .+ F_d)
-    
+	x_dot = [v; (1.0/p.m_satellite) .* (F_g .+ F_d)]
+   
+	return x_dot
 end
 
 function solve_orbit_dynamics_ECI_state(x0, dp::DynamicsParameters, t_end, h=0.1)
     
-	x, t = integrate_RK4(orbit_dynamics_ECI_state!, x0, dp, 0.0, t_end, h)
+	x, t = integrate_RK4(orbit_dynamics_ECI_state, x0, dp, 0.0, t_end, h)
 
     return x, t
 end
@@ -106,7 +106,7 @@ See: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs
 
 x = [p, f, g, h, k, L]
 """
-function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
+function orbit_dynamics_equinoctial(x, dp::DynamicsParameters, t)
 
 	p, f, g, h, k, L = x
 
@@ -132,18 +132,15 @@ function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
 
 	L_dot = ( sqrt(dp.mu * p) * (w / p)^2) + ((1 / w) * sqrtpu * (h * sin(L) - k * cos(L)) * u_N)
 
-	x_dot[1] = p_dot
-	x_dot[2] = f_dot
-	x_dot[3] = g_dot
-	x_dot[4] = h_dot
-	x_dot[5] = k_dot
-	x_dot[6] = L_dot
+	x_dot = [p_dot, f_dot, g_dot, h_dot, k_dot, L_dot]
+
+	return x_dot
 
 end
 
 function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end, h=1.0)
     
-	x, t = integrate_RK4(orbit_dynamics_equinoctial!, x0, dp, 0.0, t_end, h)
+	x, t = integrate_RK4(orbit_dynamics_equinoctial, x0, dp, 0.0, t_end, h)
 
     return x, t
 end
@@ -192,7 +189,7 @@ function drag_perturbation_RTN(v_R, v_T, dp::DynamicsParameters)
 	return u_drag
 end
 
-function orbit_dynamics_classical_elements!(x_dot, x, dp::DynamicsParameters, t)
+function orbit_dynamics_classical_elements(x, dp::DynamicsParameters, t)
 	a, e, i, omega, Omega, theta = x
 
 	p = a*(1-e^2)
@@ -211,18 +208,14 @@ function orbit_dynamics_classical_elements!(x_dot, x, dp::DynamicsParameters, t)
 	Omega_dot = (r * sin(theta + omega) * u_N) / (h * sin(i))
 	theta_dot = (h/r^2) + (1/(e*h)) * ((p * cos(theta) * u_R) - ((p + r) * sin(theta) * u_T))
 
-	x_dot[1] = a_dot
-	x_dot[2] = e_dot
-	x_dot[3] = i_dot
-	x_dot[4] = omega_dot
-	x_dot[5] = Omega_dot
-	x_dot[6] = theta_dot
+	x_dot = [a_dot, e_dot, i_dot, omega_dot, Omega_dot, theta_dot]
 
+	return x_dot
 end
 
 function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_end, h=1.0)
     
-	x, t = integrate_RK4(orbit_dynamics_classical_elements!, x0, dp, 0.0, t_end, h)
+	x, t = integrate_RK4(orbit_dynamics_classical_elements, x0, dp, 0.0, t_end, h)
 
     return x, t
 end
@@ -268,7 +261,7 @@ using `x0` as the initial condition,
 `p` as parameters for the dynamics function,
 and `h` as the fixed timestep.
 """
-function integrate_RK4(dynamics!, x0, p, t_start, t_end, h)
+function integrate_RK4(dynamics, x0, p, t_start, t_end, h)
 
 	N = Int(round((t_end - t_start) / h) + 1)
 
@@ -283,7 +276,7 @@ function integrate_RK4(dynamics!, x0, p, t_start, t_end, h)
 	# integrate
 	for i=2:N
 		t[i] = h*(i-1)
-		step_RK4!(dynamics!, view(x, :, i), x[:,i-1], p, t[i], h)
+		x[:,i] = step_RK4(dynamics, x[:,i-1], p, t[i], h)
 	end
 
 	return x, t
@@ -292,19 +285,16 @@ end
 """
 Use Runge-Kutta 4 to integrate the dynamics at `(x, t)`, using parameters `p` and timestep `h`.
 """
-function step_RK4!(dynamics!, x_kp1, x_k, p, t, h)
+function step_RK4(dynamics, x_k, p, t, h)
 
-	k1 = similar(x_k)
-	k2 = similar(x_k)
-	k3 = similar(x_k)
-	k4 = similar(x_k)
+	k1 = dynamics(x_k, p, t)
+	k2 = dynamics(x_k .+ 0.5 .* h .* k1, p, t + 0.5 * h)
+	k3 = dynamics(x_k .+ 0.5 .* h .* k2, p, t + 0.5 * h)
+	k4 = dynamics(x_k .+ h .* k3, p, t + h)
 
-	dynamics!(k1, x_k, p, t)
-	dynamics!(k2, x_k .+ 0.5 .* h .* k1, p, t + 0.5 * h)
-	dynamics!(k3, x_k .+ 0.5 .* h .* k2, p, t + 0.5 * h)
-	dynamics!(k4, x_k .+ h .* k3, p, t + h)
+	x_kp1 = x_k .+ (1.0/6.0) * h .* (k1 .+ (2 .* k2) .+ (2 .* k3) .+ k4)
 
-	x_kp1 .= x_k .+ (1.0/6.0) * h .* (k1 .+ (2 .* k2) .+ (2 .* k3) .+ k4)
+	return x_kp1
 
 end
 
