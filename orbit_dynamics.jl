@@ -118,17 +118,19 @@ function orbit_dynamics_equinoctial!(x_dot, x, dp::DynamicsParameters, t)
 	w = 1 + (f * cos(L)) + (g * sin(L))
 	s_sq = 1 + h^2 + k^2
 
-	p_dot = 2 * (p / w) * sqrt(p / dp.mu) * u_T
-	f_dot = ((sqrt(p / dp.mu) * sin(L) * u_R)
-			 + (sqrt(p / dp.mu) * (1 / w) * ((w + 1) * cos(L) + f) * u_T)
-			 - (sqrt(p / dp.mu) * (g / w) * (h * sin(L) - k * cos(L)) * u_N))
-	g_dot = ((-sqrt(p / dp.mu) * cos(L) * u_R)
-			 + (sqrt(p / dp.mu) * ((w + 1) * sin(L) + g) * u_T)
-			 + (sqrt(p / dp.mu) * (f / w) * (h * sin(L) - k * cos(L)) * u_N))
-	h_dot = sqrt(p/dp.mu) * (s_sq / (2 * w)) * cos(L) * u_N
-	k_dot = sqrt(p/dp.mu) * (s_sq / (2 * w)) * sin(L) * u_N
-	L_dot = ((sqrt(dp.mu * p) * (w / p)^2)
-			 + (sqrt(p / dp.mu) * (h * sin(L) - k * cos(L)) * u_N))
+	sqrtpu = sqrt(p/dp.mu)
+
+	p_dot = 2 * (p / w) * sqrtpu * u_T
+
+	f_dot = sqrtpu * (( sin(L) * u_R) + ((1 / w) * ((w + 1) * cos(L) + f) * u_T) - ((g / w) * (h * sin(L) - k * cos(L)) * u_N))
+
+	g_dot = sqrtpu * ((-cos(L) * u_R) + ((1 / w) * ((w + 1) * sin(L) + g) * u_T) + ((f / w) * (h * sin(L) - k * cos(L)) * u_N))
+
+	h_dot = sqrtpu * (s_sq / (2 * w)) * cos(L) * u_N
+
+	k_dot = sqrtpu * (s_sq / (2 * w)) * sin(L) * u_N
+
+	L_dot = ( sqrt(dp.mu * p) * (w / p)^2) + ((1 / w) * sqrtpu * (h * sin(L) - k * cos(L)) * u_N)
 
 	x_dot[1] = p_dot
 	x_dot[2] = f_dot
@@ -148,6 +150,7 @@ end
 
 """
 J2 perturbing gravity forces computed using equinoctial coordinates
+Source: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
 """
 function gravity_perturbation_equinoctial(x, dp)
 
@@ -156,9 +159,9 @@ function gravity_perturbation_equinoctial(x, dp)
 	w = 1 + f * cos(L) + g * sin(L)
 	r = p / w
 
-	u_J2_R = ((-3 * dp.mu * dp.J2 * dp.R_earth^2) / (2 * r^4)) * (1 - 12 * (h * sin(L) - k * cos(L))^2 / (1 + h^2 + k^2)^2)
-	u_J2_T = ((-12 * dp.mu * dp.J2 * dp.R_earth^2) / (2 * r^4)) * ((h * sin(L) - k * cos(L))*(h * cos(L) + k * sin(L)) / (1 + h^2 + k^2)^2)
-	u_J2_N = ((-6 * dp.mu * dp.J2 * dp.R_earth^2) / (2 * r^4)) * ((1 - h^2 - k^2)*(h * sin(L) - k * cos(L)) / (1 + h^2 + k^2)^2)
+	u_J2_R = ((-3  * dp.mu * dp.J2 * dp.R_earth^2) / (2 * r^4)) * (1 - 12 * (h * sin(L) - k * cos(L))^2 / (1 + h^2 + k^2)^2)
+	u_J2_T = ((-12 * dp.mu * dp.J2 * dp.R_earth^2) / (r^4))     * ((h * sin(L) - k * cos(L))*(h * cos(L) + k * sin(L)) / (1 + h^2 + k^2)^2)
+	u_J2_N = ((-6  * dp.mu * dp.J2 * dp.R_earth^2) / (r^4))     * ((1 - h^2 - k^2)*(h * sin(L) - k * cos(L)) / (1 + h^2 + k^2)^2)
 
 	u_J2 = [u_J2_R, u_J2_T, u_J2_N]
 	return u_J2
@@ -224,6 +227,9 @@ function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_e
     return x, t
 end
 
+"""
+Source: Orbital Mechanics for Engineering Students, pg 178
+"""
 function gravity_perturbation_classical(x, dp)
 	a, e, i, omega, Omega, theta = x
 	p = a*(1-e^2)
@@ -233,8 +239,8 @@ function gravity_perturbation_classical(x, dp)
 	c_J2 = (-3 * dp.mu * dp.J2 * dp.R_earth^2)/(2 * r^4)
 
 	u_J2_R = c_J2 * (1 - 3 * sin(i)^2 * sin(u)^2)
-	u_J2_T = c_J2 * (sin(i)^2 * sin(u) * cos(u))
-	u_J2_N = c_J2 * (sin(i) * cos(i) * sin(u))
+	u_J2_T = 2*c_J2 * (sin(i)^2 * sin(u) * cos(u))
+	u_J2_N = 2*c_J2 * (sin(i) * cos(i) * sin(u))
 
 	u_J2 = [u_J2_R, u_J2_T, u_J2_N]
 
