@@ -77,6 +77,29 @@ function orbit_dynamics_ECI_state(x, p::DynamicsParameters, t)
 	return x_dot
 end
 
+function orbit_dynamics_ECI_drag_control(x, p::DynamicsParameters, t)
+    r = x[1:3]
+    v = x[4:6]
+    u = x[7]
+    
+    r_mag = sqrt(r'*r)
+    v_mag = sqrt(v'*v)            
+        
+    # Gravity        
+    F_g = gravity_force_ECI(x, p)    
+    
+    # Drag
+    F_d = -0.5 * p.rho * p.C_D * (u * p.A) * v_mag .* v
+    
+    p_dot = v
+    v_dot = (1.0/p.m_satellite) .* (F_g .+ F_d)
+    u_dot = 0.0
+	x_dot = [p_dot; v_dot; u_dot]
+   
+	return x_dot
+end
+
+
 function solve_orbit_dynamics_ECI_state(x0, dp::DynamicsParameters, t_end, h=0.1)
     
 	x, t = integrate_RK4(orbit_dynamics_ECI_state, x0, dp, 0.0, t_end, h)
