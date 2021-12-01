@@ -38,7 +38,7 @@ end
 
 @testset "Gravity, Drag in Classical and Equinoctial" begin
 
-	dp = DynamicsParameters(m_satellite=1.0, A=10)
+	dp = DynamicsParameters(m_satellite_si=1.0, A_si=10)
 	sma_iss = 420e3 + dp.R_earth
 	e_iss = 0.1
 	i_iss = deg2rad(51.64)
@@ -60,3 +60,22 @@ end
 	@test g_eq ≈ g_cl
 
 end
+
+@testset "Scaling produces similar results" begin
+
+	dp_scaled = DynamicsParameters(distance_scale=1e7, time_scale=3600)
+	dp_unscaled = DynamicsParameters(distance_scale=1.0, time_scale=1.0)
+
+	x0_unscaled = classical_to_state_vector([dp_unscaled.R_earth + 500e3, 0.1, deg2rad(45), deg2rad(60), deg2rad(240), deg2rad(145)], dp_unscaled)
+	x0_scaled = scale_state_vector(x0_unscaled, dp_scaled)
+	@test x0_unscaled ≈ unscale_state_vector(x0_scaled, dp_scaled)
+	@test x0_scaled ≈ scale_state_vector(unscale_state_vector(x0_scaled, dp_scaled), dp_scaled)
+
+	x0_dot_unscaled = orbit_dynamics_ECI_state(x0_unscaled, dp_unscaled, 0.0)
+	x0_dot_scaled = orbit_dynamics_ECI_state(x0_scaled, dp_scaled, 0.0)
+
+	@test x0_dot_scaled ≈ scale_state_vector_dot(x0_dot_unscaled, dp_scaled)
+	@test x0_dot_unscaled ≈ unscale_state_vector_dot(x0_dot_scaled, dp_scaled)
+
+end
+

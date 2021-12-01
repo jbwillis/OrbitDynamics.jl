@@ -193,3 +193,51 @@ function specific_mechanical_energy(x_rv, x_cl, dp::DynamicsParameters)
 	return sme
 
 end
+
+"""
+Convert ECI vector [r; v] from scaled units to unscaled (SI) units
+"""
+function unscale_state_vector(x_scaled, dp::DynamicsParameters)
+
+	x_unscaled = copy(x_scaled)
+	x_unscaled[1:3] *= dp.distance_scale
+	x_unscaled[4:6] *= (dp.distance_scale/dp.time_scale)
+	
+	return x_unscaled
+end
+
+"""
+Convert ECI vector [v; a] from scaled units to unscaled (SI) units
+"""
+function unscale_state_vector_dot(x_dot_scaled, dp::DynamicsParameters)
+
+	x_dot_unscaled = copy(x_dot_scaled)
+	x_dot_unscaled[1:3] *= (dp.distance_scale/dp.time_scale)
+	x_dot_unscaled[4:6] *= (dp.distance_scale/dp.time_scale^2)
+	
+	return x_dot_unscaled
+end
+
+"""
+Convert ECI vector [r; v] from unscaled (SI) units to scaled units
+"""
+function scale_state_vector(x_unscaled, dp::DynamicsParameters)
+
+	x_scaled = copy(x_unscaled)
+	x_scaled[1:3] /= dp.distance_scale # m * dunit / m
+	x_scaled[4:6] /= (dp.distance_scale/dp.time_scale)
+	
+	return x_scaled
+end
+
+"""
+Convert ECI vector [v; a] from scaled units to unscaled (SI) units
+"""
+function scale_state_vector_dot(x_dot_unscaled, dp::DynamicsParameters)
+
+	x_dot_scaled = copy(x_dot_unscaled)
+	x_dot_scaled[1:3] /= (dp.distance_scale/dp.time_scale)
+	x_dot_scaled[4:6] /= (dp.distance_scale/dp.time_scale^2)
+	
+	return x_dot_scaled
+end

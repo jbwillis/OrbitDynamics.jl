@@ -2,8 +2,6 @@
 
 struct DynamicsParameters
     # fixed parameters
-    G_gravity::Float64
-    M_earth::Float64
 	mu::Float64
     J2::Float64
     R_earth::Float64
@@ -11,26 +9,31 @@ struct DynamicsParameters
     rho::Float64
     C_D::Float64
     A::Float64
+	distance_scale::Float64
+	time_scale::Float64
     
     function DynamicsParameters(;
-            m_satellite=1.0,
-            rho=1e-12,
-            C_D=1.0, 
-            A=(.3*.1), # side of a 3U
-            G_gravity=6.674e-11,
-            M_earth=5.9722e24, # kg
-			J2=0.0010826358191967,
-			R_earth=6.378136300e6)
+            m_satellite_si=1.0, # kg
+            rho_si=1e-12, # kg/m^3
+            C_D=1.0, # nondimensional
+            A_si=(.3*.1), # m^2
+			mu_earth_si=3.986004415e14, # m^3/s^2
+			J2=0.0010826358191967, # nondimensional
+			R_earth_si=6.378136300e6, # m
+			distance_scale=1.0, # m/distance_unit
+			time_scale=1.0, # s/time_unit
+			)
         return new(
-            G_gravity,
-            M_earth,
-			3.986004415e14, # mu
+		    mu_earth_si * (time_scale^2) / (distance_scale^3), # mu
             J2,
-            R_earth,
-            m_satellite,
-            rho,
+            R_earth_si / distance_scale,
+            m_satellite_si,
+			rho_si * (distance_scale^3),
             C_D,
-            A)
+			A_si / (distance_scale^2),
+			distance_scale,
+			time_scale
+			)
     end
 end
 
