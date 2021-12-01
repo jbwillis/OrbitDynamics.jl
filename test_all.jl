@@ -71,6 +71,10 @@ end
 	@test x0_unscaled ≈ unscale_state_vector(x0_scaled, dp_scaled)
 	@test x0_scaled ≈ scale_state_vector(unscale_state_vector(x0_scaled, dp_scaled), dp_scaled)
 
+    x0_cl_1 = state_vector_to_classical_elements(x0_scaled, dp_scaled)
+    x0_cl_2 = state_vector_to_classical_elements(x0_unscaled, dp_unscaled)
+	@test x0_cl_1[2:end] ≈ x0_cl_2[2:end] # scaling shouldn't affect angles
+
 	x0_dot_unscaled = orbit_dynamics_ECI_state(x0_unscaled, dp_unscaled, 0.0)
 	x0_dot_scaled = orbit_dynamics_ECI_state(x0_scaled, dp_scaled, 0.0)
 
