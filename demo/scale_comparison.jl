@@ -1,6 +1,5 @@
-include("orbit_dynamics.jl")
-include("orbit_representations.jl")
-include("orbit_plotting.jl")
+using OrbitDynamics
+using OrbitDynamics.OrbitPlotting
 
 dp_scaled = DynamicsParameters(distance_scale=1e7, time_scale=1e3)
 dp_unscaled = DynamicsParameters(distance_scale=1.0, time_scale=1.0)

@@ -1,11 +1,11 @@
-# Test/Example program of using this package to simulate the ISS
-using Pkg;Pkg.activate(@__DIR__);
+# Test/Example program of using this package to simulate a cubesat in the ISS orbit
+using LinearAlgebra
+using PyPlot
 
-include("orbit_dynamics.jl")
-include("orbit_representations.jl")
-include("orbit_plotting.jl")
+using OrbitDynamics
+using OrbitDynamics.OrbitPlotting
 
-dp = DynamicsParameters(m_satellite=1.0, A=0.1)
+dp = DynamicsParameters(m_satellite_si=1.0, A_si=0.1)
 
 sma_iss = 420e3 + dp.R_earth
 # e_iss = 0.0003836

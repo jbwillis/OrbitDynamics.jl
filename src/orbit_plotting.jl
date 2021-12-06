@@ -1,9 +1,13 @@
+module OrbitPlotting
+
 using PyPlot
 using LaTeXStrings
 
+export t_scale_e, sec, min, hr, day, year
 @enum t_scale_e sec=1 min=60 hr=60*60 day=24*60*60 year=365*24*60*60
 
 
+export plot_3D_position
 function plot_3D_position(r; label=nothing, fig=nothing, ax=nothing)
 	if fig == nothing || ax == nothing
 		fig = plt.figure()
@@ -51,6 +55,7 @@ function plot_3D_position(r; label=nothing, fig=nothing, ax=nothing)
 	return fig, ax
 end
 
+export plot_classical_elements
 function plot_classical_elements(x_cl, t; label=nothing, fig=nothing, ax=nothing, t_scale::t_scale_e=hr)
 	if fig == nothing || ax == nothing
 		fig, ax = plt.subplots(6, 1, sharex=true)
@@ -86,4 +91,5 @@ function plot_classical_elements(x_cl, t; label=nothing, fig=nothing, ax=nothing
 	return fig, ax
 end
 
+end #module
 

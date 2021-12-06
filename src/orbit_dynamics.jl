@@ -1,5 +1,6 @@
 # Functions and structs for simulating orbits
 
+export DynamicsParameters
 struct DynamicsParameters
     # fixed parameters
 	mu::Float64
@@ -37,6 +38,7 @@ struct DynamicsParameters
     end
 end
 
+export gravity_force_ECI
 """
 Taken from Spacecraft Attitude Determination and Control - works well
 """
@@ -50,6 +52,7 @@ function gravity_force_ECI(x, p::DynamicsParameters)
     return F_g
 end
 
+export gravity_perturbation_ECI
 function gravity_perturbation_ECI(x, p::DynamicsParameters)
 	r = x[1:3]
     r_mag = sqrt(r'*r)
@@ -61,7 +64,7 @@ function gravity_perturbation_ECI(x, p::DynamicsParameters)
 	return a_J2
 end
     
-
+export orbit_dynamics_ECI_state
 function orbit_dynamics_ECI_state(x, p::DynamicsParameters, t)
     
     r = x[1:3]
@@ -80,6 +83,7 @@ function orbit_dynamics_ECI_state(x, p::DynamicsParameters, t)
 	return x_dot
 end
 
+export orbit_dynamics_ECI_drag_control
 function orbit_dynamics_ECI_drag_control(x, p::DynamicsParameters, t)
     r = x[1:3]
     v = x[4:6]
@@ -102,7 +106,7 @@ function orbit_dynamics_ECI_drag_control(x, p::DynamicsParameters, t)
 	return x_dot
 end
 
-
+export solve_orbit_dynamics_ECI_state
 function solve_orbit_dynamics_ECI_state(x0, dp::DynamicsParameters, t_end, h=0.1)
     
 	x, t = integrate_RK4(orbit_dynamics_ECI_state, x0, dp, 0.0, t_end, h)
@@ -110,6 +114,7 @@ function solve_orbit_dynamics_ECI_state(x0, dp::DynamicsParameters, t_end, h=0.1
     return x, t
 end
 
+export circular_orbit_initial_conditions
 function circular_orbit_initial_conditions(orbit_altitude, inclination, p::DynamicsParameters)
     
     r_orbit = orbit_altitude + p.R_earth
@@ -124,6 +129,7 @@ function circular_orbit_initial_conditions(orbit_altitude, inclination, p::Dynam
     return x
 end
 
+export orbit_dynamics_equinoctial
 """
 Use the modified equinoctial elements to simulate.
 Allows large time steps and prevents singularities for e=0, i=0,90 degrees
@@ -164,6 +170,7 @@ function orbit_dynamics_equinoctial(x, dp::DynamicsParameters, t)
 
 end
 
+export solve_orbit_dynamics_equinoctial
 function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end, h=1.0)
     
 	x, t = integrate_RK4(orbit_dynamics_equinoctial, x0, dp, 0.0, t_end, h)
@@ -171,6 +178,7 @@ function solve_orbit_dynamics_equinoctial(x0, dp::DynamicsParameters, t_end, h=1
     return x, t
 end
 
+export gravity_perturbation_equinoctial
 """
 J2 perturbing gravity forces computed using equinoctial coordinates
 Source: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
@@ -190,6 +198,7 @@ function gravity_perturbation_equinoctial(x, dp)
 	return u_J2
 end
 
+export drag_perturbation_equinoctial
 """
 Aerodynamic drag accelerations using equinoctial coordinates
 """
@@ -203,6 +212,7 @@ function drag_perturbation_equinoctial(x, dp::DynamicsParameters)
 	return drag_perturbation_RTN(v_R, v_T, dp)
 end
 
+export drag_perturbation_RTN
 function drag_perturbation_RTN(v_R, v_T, dp::DynamicsParameters)
 	v = sqrt(v_R^2 + v_T^2)
 
@@ -215,6 +225,7 @@ function drag_perturbation_RTN(v_R, v_T, dp::DynamicsParameters)
 	return u_drag
 end
 
+export orbit_dynamics_classical_elements
 function orbit_dynamics_classical_elements(x, dp::DynamicsParameters, t)
 	a, e, i, omega, Omega, theta = x
 
@@ -239,6 +250,7 @@ function orbit_dynamics_classical_elements(x, dp::DynamicsParameters, t)
 	return x_dot
 end
 
+export solve_orbit_dynamics_classical_elements
 function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_end, h=1.0)
     
 	x, t = integrate_RK4(orbit_dynamics_classical_elements, x0, dp, 0.0, t_end, h)
@@ -246,6 +258,7 @@ function solve_orbit_dynamics_classical_elements(x0, dp::DynamicsParameters, t_e
     return x, t
 end
 
+export gravity_perturbation_classical
 """
 Source: Orbital Mechanics for Engineering Students, pg 178
 """
@@ -266,6 +279,7 @@ function gravity_perturbation_classical(x, dp)
 	return u_J2
 end
 
+export drag_perturbation_classical
 """
 Source: Position and velocity perturbations in the orbital frame in terms of classical element perturbations
 """
@@ -281,6 +295,7 @@ function drag_perturbation_classical(x, dp)
 	return drag_perturbation_RTN(v_R, v_T, dp)
 end
 
+export integrate_RK4
 """
 Use Runge-Kutta 4 to integrate the dynamics from `t_start` to `t_end` 
 using `x0` as the initial condition, 
@@ -308,6 +323,7 @@ function integrate_RK4(dynamics, x0, p, t_start, t_end, h)
 	return x, t
 end
 
+export step_RK4
 """
 Use Runge-Kutta 4 to integrate the dynamics at `(x, t)`, using parameters `p` and timestep `h`.
 """

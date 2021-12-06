@@ -1,9 +1,6 @@
 # Code for converting between different orbit representations
 
-using LinearAlgebra
-
-include("orbit_dynamics.jl")
-
+export equinoctial_to_classical_elements
 """
 Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
 """
@@ -24,6 +21,7 @@ function equinoctial_to_classical_elements(x_eq)
 	return [a, e, i, omega, Omega, theta]
 end
 
+export classical_to_equinoctial_elements
 """
 Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
 """
@@ -41,6 +39,7 @@ function classical_to_equinoctial_elements(x_cl)
 	return [p, f, g, h, k, L]
 end
 
+export classical_to_state_vector
 """
 Reference: Fundamentals of Spacecraft Attitude Determination and Control, pg 380
 """
@@ -73,6 +72,7 @@ function classical_to_state_vector(x_cl, dp::DynamicsParameters)
 	return vcat(r_vec, v_vec)
 end
 
+export equinoctial_to_state_vector
 """
 Reference: https://spsweb.fltops.jpl.nasa.gov/portaldataops/mpg/MPG_Docs/Source%20Docs/EquinoctalElements-modified.pdf
 """
@@ -95,8 +95,8 @@ function equinoctial_to_state_vector(x_eq, dp::DynamicsParameters)
 	return [r_x, r_y, r_z, v_x, v_y, v_z]
 end
 
+export state_vector_to_equinoctial_elements
 """
-Reference: Fundamentals of Spacecraft Attitude Determination and Control, pg 380
 """
 function state_vector_to_equinoctial_elements(x_st, dp::DynamicsParameters)
 
@@ -107,6 +107,7 @@ function state_vector_to_equinoctial_elements(x_st, dp::DynamicsParameters)
 	return x_eq
 end
 
+export state_vector_to_classical_elements
 """
 Source: Followed https://github.com/sisl/SatelliteDynamics.jl/blob/master/src/astrodynamics.jl#L248
 """
@@ -143,6 +144,7 @@ function state_vector_to_classical_elements(x_st, dp::DynamicsParameters)
 	return [a, e, i, omega, Omega, theta]
 end
 
+export E_from_M
 function E_from_M(M, e; tol=1e-10)
     f(E) = E - e * sin(E) - M # = 0
     f_prime(E) = 1 - e * cos(E)
@@ -156,18 +158,22 @@ function E_from_M(M, e; tol=1e-10)
     return E_n
 end
 
+export theta_from_E
 function theta_from_E(E, e)
     return atan(sqrt(1-e^2) * sin(E), cos(E) - e)
 end
 
+export E_from_theta
 function E_from_theta(theta, e)
     return atan(sqrt(1 - e^2) * sin(theta), cos(theta) + e)
 end
 
+export M_from_E
 function M_from_E(E, e)
     return E - e * sin(E)
 end
 
+export specific_mechanical_energy
 """
 Compute the specific mechanical energy of a given set of orbit states
 """
@@ -194,6 +200,7 @@ function specific_mechanical_energy(x_rv, x_cl, dp::DynamicsParameters)
 
 end
 
+export unscale_state_vector
 """
 Convert ECI vector [r; v] from scaled units to unscaled (SI) units
 """
@@ -206,6 +213,7 @@ function unscale_state_vector(x_scaled, dp::DynamicsParameters)
 	return x_unscaled
 end
 
+export unscale_state_vector_dot
 """
 Convert ECI vector [v; a] from scaled units to unscaled (SI) units
 """
@@ -218,6 +226,7 @@ function unscale_state_vector_dot(x_dot_scaled, dp::DynamicsParameters)
 	return x_dot_unscaled
 end
 
+export scale_state_vector
 """
 Convert ECI vector [r; v] from unscaled (SI) units to scaled units
 """
@@ -230,6 +239,7 @@ function scale_state_vector(x_unscaled, dp::DynamicsParameters)
 	return x_scaled
 end
 
+export scale_state_vector_dot
 """
 Convert ECI vector [v; a] from scaled units to unscaled (SI) units
 """
