@@ -53,3 +53,21 @@ end
 
 end
 
+@testset "Cartesian to cylindrical" begin
+@test pos_cartesian_to_cylindrical(pos_cylindrical_to_cartesian([1,2,3])) ≈ [1, 2, 3]
+@test vel_cartesian_to_cylindrical(pos_cylindrical_to_cartesian([5, 1, -1]), vel_cylindrical_to_cartesian([5, 1, -1], [3, 0.2, 1])) ≈ [3, 0.2, 1]
+@test accel_cylindrical_to_cartesian(pos_cartesian_to_cylindrical([1, 0, 0]), vel_cartesian_to_cylindrical([1, 0, 0], [9, 8, 7]), accel_cartesian_to_cylindrical([1, 0, 0], [9, 8, 7], [11, 12, 13])) ≈ [11, 12, 13]
+
+dp = DynamicsParameters()
+x0_cl = [420e3 + dp.R_earth, 0.1, deg2rad(45), deg2rad(155), deg2rad(247), deg2rad(101)]
+xu0 = [classical_to_state_vector(x0_cl, dp); 1.0]
+xu0_cyl = [state_cartesian_to_cylindrical(xu0[1:6]); xu0[7]]
+
+x_cart_dot = orbit_dynamics_ECI_drag_control(xu0, dp, 0.0)
+x_cyl_dot = orbit_dynamics_cylindrical_drag_control(xu0_cyl, dp, 0.0)
+
+# make sure dynamics are the same in cartesian and cylindrical
+@test x_cart_dot[1:6] ≈ state_dot_cylindrical_to_cartesian(xu0_cyl, x_cyl_dot)
+@test x_cyl_dot[1:6] ≈ state_dot_cartesian_to_cylindrical(xu0, x_cart_dot)
+
+end

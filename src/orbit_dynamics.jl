@@ -129,6 +129,20 @@ function circular_orbit_initial_conditions(orbit_altitude, inclination, p::Dynam
     return x
 end
 
+export orbit_dynamics_cylindrical_drag_control
+function orbit_dynamics_cylindrical_drag_control(wu, dp::DynamicsParameters, t)
+   
+    xu = [state_cylindrical_to_cartesian(wu[1:6]); wu[7]]
+    
+    xu_dot = orbit_dynamics_ECI_drag_control(xu, dp, t)
+    
+    wu_dot = [state_dot_cartesian_to_cylindrical(xu, xu_dot); xu_dot[7]]
+    
+    return wu_dot    
+end
+
+
+
 export orbit_dynamics_equinoctial
 """
 Use the modified equinoctial elements to simulate.

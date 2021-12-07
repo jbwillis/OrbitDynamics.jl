@@ -251,3 +251,97 @@ function scale_state_vector_dot(x_dot_unscaled, dp::DynamicsParameters)
 	
 	return x_dot_scaled
 end
+
+export pos_cartesian_to_cylindrical
+function pos_cartesian_to_cylindrical(p)
+    x, y, z = p
+    
+    r = (x^2 + y^2)^0.5
+    θ = atan(y, x)
+    h = z
+    
+    return [r, θ, h]
+end
+
+export vel_cartesian_to_cylindrical
+function vel_cartesian_to_cylindrical(p, v)
+    x, y, z = p
+    xd, yd, zd = v
+    
+    rd = (x*xd + y*yd) / (x^2 + y^2)^(0.5)
+    θd = (yd*x - xd*y) / (x^2 + y^2)
+    hd = zd
+    
+    return [rd, θd, hd]
+end
+
+export accel_cartesian_to_cylindrical
+function accel_cartesian_to_cylindrical(p, v, a)
+    x, y, z = p
+    xd, yd, zd = v
+    xdd, ydd, zdd = a
+    
+    rdd = ((xd^2 + x*xdd + yd^2 + y*ydd) * ((x^2 + y^2)^(-0.5))) - (((x*xd + y*yd)^2) * ((x^2 + y^2)^(-1.5)))
+    
+    θdd = ((ydd*x - xdd*y) * ((x^2 + y^2)^(-1))) - ((yd*x - xd*y)*(2*x*xd + 2*y*yd) * ((x^2 + y^2)^(-2)))
+    
+    hdd = zdd
+    
+    return [rdd, θdd, hdd]
+end
+
+export state_cartesian_to_cylindrical
+function state_cartesian_to_cylindrical(x)
+    return [pos_cartesian_to_cylindrical(x[1:3]); vel_cartesian_to_cylindrical(x[1:3], x[4:6])]
+end
+
+export state_dot_cartesian_to_cylindrical
+function state_dot_cartesian_to_cylindrical(x, xd)
+    return [vel_cartesian_to_cylindrical(x[1:3], xd[1:3]); accel_cartesian_to_cylindrical(x[1:3], xd[1:3], xd[4:6])]
+end
+
+export pos_cylindrical_to_cartesian
+function pos_cylindrical_to_cartesian(w)
+    r, θ, h = w
+    
+    x = r*cos(θ)
+    y = r*sin(θ)
+    z = h
+    
+    return [x, y, z]
+end
+
+export vel_cylindrical_to_cartesian
+function vel_cylindrical_to_cartesian(w, wd)
+    r, θ, h = w
+    rd, θd, hd = wd
+    
+    xd = rd * cos(θ) - r * θd * sin(θ)
+    yd = rd * sin(θ) + r * θd * cos(θ)
+    zd = hd
+    
+    return [xd, yd, zd]
+end
+
+export accel_cylindrical_to_cartesian
+function accel_cylindrical_to_cartesian(w, wd, wdd)
+    r, θ, h = w
+    rd, θd, hd = wd
+    rdd, θdd, hdd = wdd
+   
+    xdd = rdd*cos(θ) - 2*rd*θd*sin(θ) - r*θdd*sin(θ) - r*(θd^2)*cos(θ)
+    ydd = rdd*sin(θ) + 2*rd*θd*cos(θ) + r*θdd*cos(θ) - r*(θd^2)*sin(θ)
+    zdd = hdd
+    
+    return [xdd, ydd, zdd]
+end
+
+export state_cylindrical_to_cartesian
+function state_cylindrical_to_cartesian(w)
+    return [pos_cylindrical_to_cartesian(w[1:3]); vel_cylindrical_to_cartesian(w[1:3], w[4:6])]
+end
+
+export state_dot_cylindrical_to_cartesian
+function state_dot_cylindrical_to_cartesian(w, wd)
+    return [vel_cylindrical_to_cartesian(w[1:3], wd[1:3]); accel_cylindrical_to_cartesian(w[1:3], wd[1:3], wd[4:6])]
+end
