@@ -44,6 +44,13 @@ end
     x0_cl_1 = state_vector_to_classical_elements(x0_scaled, dp_scaled)
     x0_cl_2 = state_vector_to_classical_elements(x0_unscaled, dp_unscaled)
 	@test x0_cl_1[2:end] ≈ x0_cl_2[2:end] # scaling shouldn't affect angles
+	@test 0 < x0_cl_1[1] < 1.0
+	@test 1e6 < x0_cl_2[1] < 1e7
+
+	x0_cl_1_cart = classical_to_state_vector(x0_cl_1, dp_scaled)
+	@test x0_cl_1_cart ≈ x0_scaled
+	x0_cl_2_cart = classical_to_state_vector(x0_cl_2, dp_unscaled)
+	@test x0_cl_2_cart ≈ x0_unscaled
 
 	x0_dot_unscaled = orbit_dynamics_ECI_state(x0_unscaled, dp_unscaled, 0.0)
 	x0_dot_scaled = orbit_dynamics_ECI_state(x0_scaled, dp_scaled, 0.0)
