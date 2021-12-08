@@ -14,9 +14,9 @@ function equinoctial_to_classical_elements(x_eq)
 	Omega = atan(k, h)
 	theta = L - (Omega + omega)
 
-	omega = mod2pi(omega)
-	Omega = mod2pi(Omega)
-	theta = mod2pi(theta)
+	omega = rem2pi(omega, RoundDown)
+	Omega = rem2pi(Omega, RoundDown)
+	theta = rem2pi(theta, RoundDown)
 
 	return [a, e, i, omega, Omega, theta]
 end
@@ -121,6 +121,7 @@ function state_vector_to_classical_elements(x_st, dp::DynamicsParameters)
 
 	i = atan(sqrt(W[1]^2 + W[2]^2), W[3])
 	Omega = atan(W[1], -W[2])
+
 	p = norm(h)^2/dp.mu
 	a = 1.0/(2.0/norm(r) - norm(v)^2/dp.mu)
 
@@ -137,9 +138,9 @@ function state_vector_to_classical_elements(x_st, dp::DynamicsParameters)
 	theta = atan(sqrt(1-e^2)*sin(E), cos(E) - e) # true anomaly
 	omega = u - theta # argument of perigee
 
-	omega = mod2pi(omega)
-	Omega = mod2pi(Omega)
-	theta = mod2pi(theta)
+	omega = rem2pi(omega, RoundDown)
+	Omega = rem2pi(Omega, RoundDown)
+	theta = rem2pi(theta, RoundDown)
 
 	return [a, e, i, omega, Omega, theta]
 end
